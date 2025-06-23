@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://github.com/karthiks/query_blogger_mcp_server"
+"Bug Tracker" = "https://github.com/karthiks/query_blogger_mcp_server/issues"
+
+[project]
+name = "query_blogger_mcp_server"
+version = "0.1.0"
+description = "Model Context Protocol (MCP) server for read-only, domain-specific Blogger API access."
+authors = [
+    { name = "Karthik Sirasanagandla", email = "sirkarthik@gmail.com" }
+]
+license = { text = "MIT LICENSE" }
+readme = "README.md"
+
+requires-python = ">=3.10" # Min Python Version
+dependencies = [
+    "mcp[cli]>=1.9,<2.0", # Python SDK that implements MCP spec to build/create MCP servers/clients
+    "httpx>=0.28.1,<0.29", # for native async-await support that `requests` lib doesn't have
+    "uvicorn[standard]==0.34.3", # ASGI server to run web-app
+    "fastapi==0.115.13", # web framework for building APIs
+]
+
+
+[project.optional-dependencies]
+# Development dependencies (for pip-compile -P dev requirements-dev.in)
+dev = [
+    "python-dotenv>=1.0.1",
+    "flake8>=7.1.1",
+    "pylint>=3.3.3",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "pyright>=1.1.394",
+]
+
+[tool.pip-tools]
+# Options for pip-compile and pip-sync
+# You can add options like:
+# generate-hashes = true # Recommended for production deployments for security
+# cross-platform = false # True if you need a single requirements.txt for multiple OS/architectures
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["query_blogger_mcp_server*"] # This tells setuptools to find packages starting with query_blogger_mcp_server
+
+[tool.setuptools.package-data]
+"query_blogger_mcp_server" = ["**/*.txt", "**/*.md"] # Example: if you had data files
