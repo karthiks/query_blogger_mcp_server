@@ -1,0 +1,64 @@
+import httpx
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+# This class will encapsulate the logic for calling the actual Blogger API.
+
+class BloggerAPIClient:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = "https://www.googleapis.com/blogger/v3"
+        self.client = httpx.AsyncClient() # Asynchronous HTTP client
+
+    async def get_blog_by_url(self, blog_url: str) -> dict | None:
+        """
+        Retrieves blog information by its URL.
+        https://developers.google.com/blogger/docs/3.0/reference/blogs/getByUrl
+        """
+        params = {"url": blog_url, "key": self.api_key}
+        try:
+            response = await self.client.get(f"{self.base_url}/blogs/byurl", params=params)
+            response.raise_for_status() # Raise an exception for HTTP errors (4xx or 5xx)
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error retrieving blog by URL {blog_url}: {e.response.status_code} - {e.response.text}")
+            return None
+        except httpx.RequestError as e:
+            logger.error(f"Network error retrieving blog by URL {blog_url}: {e}")
+            return None
+
+    async def get_posts_by_blog_id(self, blog_id: str, max_results: int = 5) -> dict | None:
+        """
+        Retrieves a list of posts for a given blog ID.
+        https://developers.google.com/blogger/docs/3.0/reference/posts/list
+        """
+        params = {"key": self.api_key, "maxResults": max_results}
+        try:
+            response = await self.client.get(f"{self.base_url}/blogs/{blog_id}/posts", params=params)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error retrieving posts for blog {blog_id}: {e.response.status_code} - {e.response.text}")
+            return None
+        except httpx.RequestError as e:
+            logger.error(f"Network error retrieving posts for blog {blog_id}: {e}")
+            return None
+
+    async def get_post_by_blog_id_and_post_id(self, blog_id: str, post_id: str) -> dict | None:
+        """
+        Retrieves a specific post by its blog ID and post ID.
+        https://developers.google.com/blogger/docs/3.0/reference/posts/get
+        """
+        params = {"key": self.api_key}
+        try:
+            response = await self.client.get(f"{self.base_url}/blogs/{blog_id}/posts/{post_id}", params=params)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error retrieving post {post_id} from blog {blog_id}: {e.response.status_code} - {e.response.text}")
+            return None
+        except httpx.RequestError as e:
+            logger.error(f"Network error retrieving post {post_id} from blog {blog_id}: {e}")
+            return None
