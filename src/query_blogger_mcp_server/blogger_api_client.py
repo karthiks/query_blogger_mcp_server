@@ -1,18 +1,22 @@
+# This class will encapsulate the logic for calling the actual Blogger API.
+
 import httpx
-import os
 import logging
+from typing import Dict, List, Optional
+
 
 logger = logging.getLogger(__name__)
 
-# This class will encapsulate the logic for calling the actual Blogger API.
-
 class BloggerAPIClient:
     def __init__(self, api_key: str):
+        if not api_key:
+            raise ValueError("Blogger API Key must be provided.")
         self.api_key = api_key
         self.base_url = "https://www.googleapis.com/blogger/v3"
         self.client = httpx.AsyncClient() # Asynchronous HTTP client
 
-    async def get_blog_by_url(self, blog_url: str) -> dict | None:
+
+    async def get_blog_by_url(self, blog_url: str) -> Optional[Dict]:
         """
         Retrieves blog information by its URL.
         https://developers.google.com/blogger/docs/3.0/reference/blogs/getByUrl
@@ -24,12 +28,16 @@ class BloggerAPIClient:
             return response.json()
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error retrieving blog by URL {blog_url}: {e.response.status_code} - {e.response.text}")
-            return None
+            # Consider specific error handling for 404 vs other errors
+            if e.response.status_code == 404:
+                return None # Blog not found
+            return {"error": f"Blogger API error: {e.response.status_code} - {e.response.text}"}
         except httpx.RequestError as e:
             logger.error(f"Network error retrieving blog by URL {blog_url}: {e}")
-            return None
+            return {"error": f"Network error connecting to Blogger API: {e}"}
 
-    async def get_posts_by_blog_id(self, blog_id: str, max_results: int = 5) -> dict | None:
+
+    async def get_posts_by_blog_id(self, blog_id: str, max_results: int = 5) -> Optional[Dict]:
         """
         Retrieves a list of posts for a given blog ID.
         https://developers.google.com/blogger/docs/3.0/reference/posts/list
@@ -41,24 +49,11 @@ class BloggerAPIClient:
             return response.json()
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error retrieving posts for blog {blog_id}: {e.response.status_code} - {e.response.text}")
-            return None
+            if e.response.status_code == 404:
+                return None # Blog or posts not found
+            return {"error": f"Blogger API error: {e.response.status_code} - {e.response.text}"}
         except httpx.RequestError as e:
             logger.error(f"Network error retrieving posts for blog {blog_id}: {e}")
-            return None
+            return {"error": f"Network error connecting to Blogger API: {e}"}
 
-    async def get_post_by_blog_id_and_post_id(self, blog_id: str, post_id: str) -> dict | None:
-        """
-        Retrieves a specific post by its blog ID and post ID.
-        https://developers.google.com/blogger/docs/3.0/reference/posts/get
-        """
-        params = {"key": self.api_key}
-        try:
-            response = await self.client.get(f"{self.base_url}/blogs/{blog_id}/posts/{post_id}", params=params)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error retrieving post {post_id} from blog {blog_id}: {e.response.status_code} - {e.response.text}")
-            return None
-        except httpx.RequestError as e:
-            logger.error(f"Network error retrieving post {post_id} from blog {blog_id}: {e}")
-            return None
+    # Add more Blogger API methods here as needed (e.g., get_post_by_id)

@@ -22,6 +22,7 @@ dependencies = [
     "httpx>=0.28.1,<0.29", # for native async-await support that `requests` lib doesn't have
     "uvicorn[standard]==0.34.3", # ASGI server to run web-app
     "fastapi==0.115.13", # web framework for building APIs
+    "pydantic-settings>=2.10,<2.11", # For managing application settings
 ]
 
 
@@ -37,13 +38,11 @@ dev = [
 ]
 
 [tool.pip-tools]
-# Options for pip-compile and pip-sync
-# You can add options like:
-# generate-hashes = true # Recommended for production deployments for security
-# cross-platform = false # True if you need a single requirements.txt for multiple OS/architectures
+generate-hashes = false # Recommended for production deployments for security
+cross-platform = false # True if you need a single requirements.txt for multiple OS/architectures
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"] # This tells setuptools to look for packages under the 'src' directory
 include = ["query_blogger_mcp_server*"] # This tells setuptools to find packages starting with query_blogger_mcp_server
 
 [tool.setuptools.package-data]

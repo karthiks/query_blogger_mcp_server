@@ -21,23 +21,26 @@ git init
 
 ## Project Directory Structure
 
+```
 query_blogger_mcp_server/
 ├── .gitignore
-├── pyproject.toml              # The central project config file that defines project metadata, dependencies etc.
-├── README.md                   # A Readme file for all clients/consumers of this project
-├── README-DEV.md               # A Readme file for all developers of this project
+├── .env.example    # Sample env file
+├── pyproject.toml  # The central project config file that defines project metadata, dependencies etc.
+├── README.md       # For clients/consumers' reference
+├── README-DEV.md   # For developers' reference
 ├── src/
 │   └── query_blogger_mcp_server/   # This is the Python package that gets installed when someone installs this project.
-│       ├── __init__.py             # Marks query_blogger_mcp_server as a Python package
+│       ├── __init__.py     # Marks this directory as Python package
 │       ├── blogger_api_client.py   # Contains the Blogger API wrapper
-│       └── server.py               # Contains your FastMCP server logic and tool definitions
-│       └── config.py               # For configuration settings (e.g., allowed domains, API keys)
+│       └── server.py   # Contains FastMCP server logic and tool definitions
+│       └── config.py   # For config settings (allowed domains, API keys, etc)
 ├── tests/
 │   ├── __init__.py
 │   ├── test_blogger_api_client.py  # Unit tests for BloggerAPIClient
 │   ├── test_mcp_tools.py           # Unit/integration tests for your MCP tools
 │   └── conftest.py                 # pytest fixtures
 ├── .env.example                    # Example of environment variables file (DON'T commit .env)
+```
 
 ## Developer Workflow
 
@@ -58,7 +61,13 @@ query_blogger_mcp_server/
     python -m venv .venv
     source .venv/bin/activate
 
-    pip install -e .
+    pip install -e '.[dev]' # Install in editable mode
     pip list
     ```
 
+## References
+
+- [Blogger API: Using the API](https://developers.google.com/blogger/docs/3.0/using#APIKey)
+    - Every request your application sends to the Blogger APIs needs to identify your application to Google. There are two ways to identify your application:
+        - If the request requires authorization (such as a request for an individual's private data), then the application must provide an [OAuth 2.0 token](https://developers.google.com/blogger/docs/3.0/using#AboutAuthorization) with the request.
+        - If the request doesn't require authorization (such as a request for public data), then the application must provide either the [API key](https://developers.google.com/blogger/docs/3.0/using#APIKey) or an OAuth 2.0 token, or both—whatever option is most convenient for you. Providing API Key is easier for read-only access to public data.
