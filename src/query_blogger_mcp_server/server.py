@@ -36,7 +36,10 @@ def _is_allowed_domain(blog_url: str) -> bool:
     try:
         parsed_url = urlparse(blog_url)
         # Check netloc (domain + port)
-        return parsed_url.netloc in settings.ALLOWED_DOMAINS
+        is_allowed = parsed_url.netloc in settings.ALLOWED_DOMAINS
+        if(not is_allowed):
+            logger.warning(f"Domain {parsed_url.netloc} is not in allowed domains")
+        return is_allowed
     except Exception as e:
         logger.warning(f"Failed to parse URL {blog_url} for domain check: {e}")
         return False

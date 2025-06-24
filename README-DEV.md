@@ -67,7 +67,12 @@ query_blogger_mcp_server/
 
 ## References
 
+- [Python Development Tools You Must Leverage For Productivity](https://blog.codonomics.com/2025/01/python-development-tools-you-must-leverage.html.html)
+
 - [Blogger API: Using the API](https://developers.google.com/blogger/docs/3.0/using#APIKey)
     - Every request your application sends to the Blogger APIs needs to identify your application to Google. There are two ways to identify your application:
         - If the request requires authorization (such as a request for an individual's private data), then the application must provide an [OAuth 2.0 token](https://developers.google.com/blogger/docs/3.0/using#AboutAuthorization) with the request.
         - If the request doesn't require authorization (such as a request for public data), then the application must provide either the [API key](https://developers.google.com/blogger/docs/3.0/using#APIKey) or an OAuth 2.0 token, or both—whatever option is most convenient for you. Providing API Key is easier for read-only access to public data.
+
+- [Docs: Pydantic > Settings Management > Disabling JSON Parsing](https://docs.pydantic.dev/latest/concepts/pydantic_settings/#disabling-json-parsing)
+    - `pydantic-settings` by default parses complex types from environment variables as JSON strings.
