@@ -181,6 +181,16 @@ python ollama_mcp_agent.py
 
 ---
 
+## Development & Contribution
+
+Thank you for considering to the development efforts of Query Blogger MCP Server!
+
+I would encourage the community to post Issues and create Pull Requests.
+
+Before you get started, please see our [Contribution Guide](./README-DEV.md).
+
+---
+
 ## ToDos
 
     [X] MVP: Allow Single Domain
@@ -199,7 +209,4 @@ python ollama_mcp_agent.py
             - Prompt: Are there any comments on the post, "The Truth About AI Coding Agents"?
             - Prompts: What are the comments on the blog post titled "The Truth About AI Coding Agents"?
             - Prompt: Summarize the feedback from the comments section of the article "The Truth About AI Coding Agents"
-
-
-
 

@@ -65,7 +65,19 @@ query_blogger_mcp_server/
     pip list
     ```
 
+## Tech Conundrums
+
+[X] [pydantic_settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) vs [python-dotenv](https://github.com/theskumar/python-dotenv)
+
+[X] [httpx](https://github.com/encode/httpx/) vs [requests](https://requests.readthedocs.io/en/latest/)
+
+[X] [FastMCP](https://github.com/jlowin/fastmcp/) vs [FastAPI_MCP](https://github.com/tadata-org/fastapi_mcp)
+
 ## References
+
+- [Github: MCP > Active Servers](https://github.com/modelcontextprotocol/servers)
+
+- [Github: MCP > Archieved Servers](https://github.com/modelcontextprotocol/servers-archived) - Reference MCP servers that are no longer maintained
 
 - [Python Development Tools You Must Leverage For Productivity](https://blog.codonomics.com/2025/01/python-development-tools-you-must-leverage.html.html)
 
@@ -76,3 +88,7 @@ query_blogger_mcp_server/
 
 - [Docs: Pydantic > Settings Management > Disabling JSON Parsing](https://docs.pydantic.dev/latest/concepts/pydantic_settings/#disabling-json-parsing)
     - `pydantic-settings` by default parses complex types from environment variables as JSON strings.
+
+- [Docs: FastMCP > Quickstart](https://gofastmcp.com/getting-started/quickstart)
+
+- [Github: LangChain MCP Adapters](https://github.com/langchain-ai/langchain-mcp-adapters) - This library provides a lightweight wrapper that makes Anthropic Model Context Protocol (MCP) tools compatible with LangChain and LangGraph.
