@@ -3,7 +3,7 @@
 # This is where you define your MCP tools, implement domain filtering, and map to the Blogger API client.
 
 import uvicorn
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 import logging
 from urllib.parse import urlparse
 from typing import Dict
@@ -14,7 +14,7 @@ from query_blogger_mcp_server.config import settings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("query_blogger_mcp_server")
+logger = logging.getLogger(__name__)
 
 # --- Initialize Blogger API client using settings ---
 # This will raise a ValueError if BLOGGER_API_KEY is not set, as handled in BloggerAPIClient's __init__
@@ -24,7 +24,8 @@ blogger_client = BloggerAPIClient(settings.BLOGGER_API_KEY)
 mcp = FastMCP(
     name=settings.MCP_SERVER_NAME,
     version=settings.MCP_SERVER_VERSION,
-    description=settings.MCP_SERVER_DESCRIPTION
+    instructions=settings.MCP_SERVER_DESCRIPTION,
+    stateless_http=True,
 )
 
 # Helper function to check if a URL belongs to an allowed domain
@@ -68,21 +69,26 @@ async def get_blog_info_by_url(blog_url: str) -> Dict:
         return {"error": "Access denied: This tool can only query blogs from pre-approved domains.", "requested_url": blog_url}
 
     blog_data = await blogger_client.get_blog_by_url(blog_url)
+    # print(f"Blog data received: {blog_data}")  # Debugging line to check the raw response
 
     if blog_data:
         # Check if blog_data contains an 'error' key from the client, indicating an API issue
         if "error" in blog_data:
             return {"error": f"Failed to retrieve blog info: {blog_data['error']}", "requested_url": blog_url}
         # Transform the raw API response to a clean, LLM-friendly format
-        return {
+        result = {
             "blog_id": blog_data.get("id"),
             "blog_title": blog_data.get("name"),
             "blog_url": blog_data.get("url"),
             "description": blog_data.get("description", "No description available."),
             "published_date": blog_data.get("published")
         }
+        logger.info(f"Blog info retrieved successfully for {blog_url}: {result}")
+        return result
     else:
-        return {"error": f"Could not find blog at {blog_url}. It might not exist or the URL is incorrect.", "requested_url": blog_url}
+        result = {"error": f"Could not find blog at {blog_url}. It might not exist or the URL is incorrect.", "requested_url": blog_url}
+        logger.warning(result["error"])
+        return result
 
 # --- MCP Tool: get_latest_posts_by_blog_url ---
 @mcp.tool(
@@ -144,4 +150,5 @@ if __name__ == "__main__":
     logger.info(f"Allowed Domains: {settings.ALLOWED_DOMAINS}")
     logger.info(f"Server Host: {settings.UVICORN_HOST}, Port: {settings.UVICORN_PORT}")
 
-    uvicorn.run(mcp, host=settings.UVICORN_HOST, port=settings.UVICORN_PORT)
+    app = mcp.http_app(transport="http")
+    uvicorn.run(app, host=settings.UVICORN_HOST, port=settings.UVICORN_PORT)

@@ -5,18 +5,8 @@ from typing import Annotated
 from pydantic import Field, field_validator, BeforeValidator # Import Field and field_validator for Pydantic v2+
 import logging
 
-# --- Explicit Logger Setup for Debugging in config.py ---
-# This ensures that messages from THIS module are always printed during debugging,
-# even if the main application's logging setup is different or less verbose.
-logger = logging.getLogger(__name__) # Get a logger instance for this module
-if not logger.handlers: # Only add handler if it's not already configured (prevents duplicate output)
-    handler = logging.StreamHandler() # Output to console
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO) # Set this logger's level to INFO
-# --------------------------------------------------------
 
+logger = logging.getLogger(__name__) # Get a logger instance for this module
 
 class Settings(BaseSettings):
     """
