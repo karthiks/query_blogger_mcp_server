@@ -155,11 +155,38 @@ When you send prompts to your LLM that's connected to this MCP server:
 
 ---
 
+## Demo Client LLM Agent Leveraging this QueryBloggerMCPServer
+
+```bash
+# Terminal 1
+# First Start MCP Server
+cd query_blogger_mcp_server
+source .venv/bin/activate
+python -m query_blogger_mcp_server.server
+
+# Terminal 2
+# Pre-requisite: You have qwenqwen2.5:0.5b model installed via Ollama
+ollama run qwen2.5:0.5b
+
+# Terminal 3
+# Start LLM Agent that calls the MCP server
+python -m query_blogger_mcp_server.server
+cd query_blogger_mcp_server/demo/
+source .venv/bin/activate
+python ollama_mcp_agent.py
+# Prompt:
+# YOU: Tell me about our blog?
+# AI: **Summary:** The provided blog is called **Codonomics** and it was published on April 26, 2010. It's an online platform focused on democratizing knowledge and experience.
+```
+
+---
+
 ## ToDos
 
     [X] MVP: Allow Single Domain
     [X] Allow Multiple Domains
     [X] User Oboarding with README.md
+    [X] User onboarding with demo client llm agent leveraging this mcp server
     [X] Dev Onboarding with README-DEV.md
     [X] Externalize configurations
     [X] Containerize with Docker
