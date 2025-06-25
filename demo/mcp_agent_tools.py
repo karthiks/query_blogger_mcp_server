@@ -31,22 +31,8 @@ class MCPAgentTools:
 
         # These tool definitions mimic what an LLM would "know" about your server.
         # In a real scenario, the LLM would dynamically get this from /mcp endpoint.
-        self.available_tools = {
-            "get_blog_info_by_url": {
-                "description": "Retrieves public information about a Blogger blog given its URL. ONLY works for allowed, pre-configured domains.",
-                "parameters": {
-                    "blog_url": {"type": "string", "description": "The full URL of the blog (e.g., 'https://yourcompanyblog.blogspot.com')."}
-                }
-            },
-            "get_latest_posts_by_blog_url": {
-                "description": "Fetches the most recent public blog posts for a specified blog URL. Optionally fetches full content for the knowledge base. ONLY works for allowed, pre-configured domains.",
-                "parameters": {
-                    "blog_url": {"type": "string", "description": "The full URL of the blog."},
-                    "num_posts": {"type": "integer", "description": "The maximum number of posts to retrieve (default is 3)."},
-                    "include_content": {"type": "boolean", "description": "Whether to fetch full post content and add to the knowledge base (default is false)."}
-                }
-            },
-        }
+        with open("tool_definitions.json", "r") as f:
+            self.available_tools = json.load(f)
 
     async def call_mcp_tool(self, tool_name: str, tool_params: Dict[str, Any]) -> Dict[str, Any]:
         """
