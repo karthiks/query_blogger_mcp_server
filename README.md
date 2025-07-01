@@ -1,8 +1,11 @@
 # Query Blogger MCP Server
 
-An MCP Server to **only query** (not modify), **your blog only** (and no other) hosted on [Blogger](https://www.blogger.com/) platform.
+An MCP Server to
+- **only query** (not modify),
+- **your whitelisted blogs only** (and no other)
+- hosted on **[Blogger](https://www.blogger.com/) platform only**.
 
-Why Query Blogger MCP Server to read a public blog posting on Blogger platform?
+Why Query Blogger MCP Server to read a public blog posts on Blogger platform?
 - Simple configuration and you are ready to go.
 - This server is designed to be secure, efficient, and easy to use with LLMs.
 

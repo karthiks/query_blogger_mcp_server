@@ -69,15 +69,17 @@ query_blogger_mcp_server/
 
 [X] [pydantic_settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) vs [python-dotenv](https://github.com/theskumar/python-dotenv)
 
-[X] [httpx](https://github.com/encode/httpx/) vs [requests](https://requests.readthedocs.io/en/latest/)
+[X] [httpx](https://github.com/encode/httpx/) vs [aiohttp](https://docs.aiohttp.org/en/stable/) vs [requests](https://requests.readthedocs.io/en/latest/)
+    - requests support sync. aiohttp supports async. httpx is a modern alternative to aiohttp with sync/async support.
+    - httpx is a drop-in replacement for aiohttp and requests.
+    - httpx supports HTTP/2 protocol and its APIs are simpler.
 
 [X] [FastMCP](https://github.com/jlowin/fastmcp/) vs [FastAPI_MCP](https://github.com/tadata-org/fastapi_mcp)
+    - Use FastAPI-MCP for easy integration with existing FastAPI apps. It is best for FastAPI users wanting to expose existing endpoints as MCP tools with minimal setup.
+    - FastMCP for more advanced, standalone MCP server needs.
+    - Both of them suffer from poor documentation. - Hect, to me, their website theme, and content style look alike making me wonder whicch one I'm looking at for comparison.
 
 ## References
-
-- [Github: MCP > Active Servers](https://github.com/modelcontextprotocol/servers)
-
-- [Github: MCP > Archieved Servers](https://github.com/modelcontextprotocol/servers-archived) - Reference MCP servers that are no longer maintained
 
 - [Python Development Tools You Must Leverage For Productivity](https://blog.codonomics.com/2025/01/python-development-tools-you-must-leverage.html.html)
 
@@ -92,3 +94,9 @@ query_blogger_mcp_server/
 - [Docs: FastMCP > Quickstart](https://gofastmcp.com/getting-started/quickstart)
 
 - [Github: LangChain MCP Adapters](https://github.com/langchain-ai/langchain-mcp-adapters) - This library provides a lightweight wrapper that makes Anthropic Model Context Protocol (MCP) tools compatible with LangChain and LangGraph.
+
+- Other Servers:
+    - [Github: MCP > Active Servers](https://github.com/modelcontextprotocol/servers) - Reference actively maintained servers
+    - [Github: MCP > Archieved Servers](https://github.com/modelcontextprotocol/servers-archived) - Reference MCP servers that are no longer maintained
+    - [Outstanding MCP Server directory](https://www.mcpdirs.org/)
+        - [Reddit > Share Your MCP Servers](https://www.reddit.com/r/mcp/comments/1li6sdj/share_your_mcp_servers/) - Graze other open-sourced mcp servers for inspiration
