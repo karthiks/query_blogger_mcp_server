@@ -2,8 +2,7 @@
 
 An MCP Server to
 - **only query** (not modify),
-- **your whitelisted blogs only** (and no other)
-- hosted on **[Blogger](https://www.blogger.com/) platform only**.
+- **only your whitelisted blogs** (and no other) that are hosted on Blogger](https://www.blogger.com/) platform.
 
 Why Query Blogger MCP Server to read a public blog posts on Blogger platform?
 - Simple configuration and you are ready to go.

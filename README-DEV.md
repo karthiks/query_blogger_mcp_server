@@ -76,7 +76,7 @@ query_blogger_mcp_server/
 
 [X] [FastMCP](https://github.com/jlowin/fastmcp/) vs [FastAPI_MCP](https://github.com/tadata-org/fastapi_mcp)
     - Use FastAPI-MCP for easy integration with existing FastAPI apps. It is best for FastAPI users wanting to expose existing endpoints as MCP tools with minimal setup.
-    - FastMCP for more advanced, standalone MCP server needs.
+    - FastMCP for more advanced, standalone MCP server needs? FastMCP simplifies the creation of Model Context Protocol (MCP) servers in Python by providing a high-level, decorator-based API. It abstracts away the complexities of JSON-RPC 2.0, schema generation, and transport handling, allowing you to focus on defining your server's capabilities.
     - Both of them suffer from poor documentation. - Hect, to me, their website theme, and content style look alike making me wonder whicch one I'm looking at for comparison.
 
 ## References
@@ -88,11 +88,16 @@ query_blogger_mcp_server/
         - If the request requires authorization (such as a request for an individual's private data), then the application must provide an [OAuth 2.0 token](https://developers.google.com/blogger/docs/3.0/using#AboutAuthorization) with the request.
         - If the request doesn't require authorization (such as a request for public data), then the application must provide either the [API key](https://developers.google.com/blogger/docs/3.0/using#APIKey) or an OAuth 2.0 token, or both—whatever option is most convenient for you. Providing API Key is easier for read-only access to public data.
 
+- [Docs: Blogger API v3 > Overview](https://developers.google.com/blogger/docs/3.0/reference/)
+
 - [Docs: Pydantic > Settings Management > Disabling JSON Parsing](https://docs.pydantic.dev/latest/concepts/pydantic_settings/#disabling-json-parsing)
     - `pydantic-settings` by default parses complex types from environment variables as JSON strings.
 
 - [Docs: FastMCP > Quickstart](https://gofastmcp.com/getting-started/quickstart)
-
+    - FastMCP primarily provides three decorators to expose different types of capabilities to MCP clients (like AI agents or IDEs):
+        - `@mcp.tool()` decorator is used to expose Python functions as callable actions that an MCP client (typically an AI model) can invoke. Tools are designed to perform computations, interact with external systems, or have side effects (e.g., sending an email, updating a database, fetching live data from an API). The AI decides when to call these tools based on its reasoning.
+        - `@mcp.resource()` decorator is used to expose read-only data or content via a URI (Uniform Resource Identifier). Resources are typically static or semi-static data that an MCP client might need to read to enrich its context. They do not perform actions or have side effects.
+        - `@mcp.prompt()` decorator is used to define reusable prompt templates or structured interaction patterns that guide how LLMs interact with your server. These are often exposed to the user (via the host application's UI) to trigger specific AI behaviors.
 - [Github: LangChain MCP Adapters](https://github.com/langchain-ai/langchain-mcp-adapters) - This library provides a lightweight wrapper that makes Anthropic Model Context Protocol (MCP) tools compatible with LangChain and LangGraph.
 
 - Other Servers:
