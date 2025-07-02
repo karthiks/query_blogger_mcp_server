@@ -2,6 +2,7 @@
 
 import httpx
 import logging
+import json
 from typing import Dict, List, Optional
 
 
@@ -18,7 +19,7 @@ class BloggerAPIClient:
 
     async def get_blog_by_url(self, blog_url: str) -> Optional[Dict]:
         """
-        Retrieves blog information by its URL.
+        Retrieves blog by its URL.
         https://developers.google.com/blogger/docs/3.0/reference/blogs/getByUrl
         """
         params = {"url": blog_url, "key": self.api_key}
@@ -37,16 +38,23 @@ class BloggerAPIClient:
             return {"error": f"Network error connecting to Blogger API: {e}"}
 
 
-    async def get_posts_by_blog_id(self, blog_id: str, max_results: int = 5) -> Optional[Dict]:
+    async def get_recent_posts(self, blog_id: str, max_results: int = 3, with_body:bool = True) -> Optional[Dict]:
         """
         Retrieves a list of posts for a given blog ID.
         https://developers.google.com/blogger/docs/3.0/reference/posts/list
         """
-        params = {"key": self.api_key, "maxResults": max_results}
+        params = {
+            "key": self.api_key,
+            "maxResults": max_results,
+            "orderBy": "updated",
+            "fetchBodies": with_body
+        }
         try:
             response = await self.client.get(f"{self.base_url}/blogs/{blog_id}/posts", params=params)
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            logger.debug(f"RESULT: BLOG TITLES = {[item['title'] for item in result.get('items',[])]}")  # Debugging line to check the raw response
+            return result
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error retrieving posts for blog {blog_id}: {e.response.status_code} - {e.response.text}")
             if e.response.status_code == 404:
@@ -56,4 +64,36 @@ class BloggerAPIClient:
             logger.error(f"Network error retrieving posts for blog {blog_id}: {e}")
             return {"error": f"Network error connecting to Blogger API: {e}"}
 
-    # Add more Blogger API methods here as needed (e.g., get_post_by_id)
+
+    async def list_recent_posts(self, blog_id: str, max_results: int = 5) -> Optional[Dict]:
+        """
+        Lists recent posts for a given blog ID.
+        This is a convenience method that uses get_recent_posts.
+        """
+        result =  await self.get_recent_posts(blog_id, max_results=max_results, with_body=False)
+        return result
+
+
+    async def search_posts(self, blog_id:str, query_terms: str, max_results: int = 5, with_body:bool = True) -> Optional[Dict]:
+        """
+        Searches for posts in a blog by query terms.
+        https://developers.google.com/blogger/docs/3.0/reference/posts/list
+        """
+        params = {
+            "key": self.api_key,
+            "q": query_terms,
+            "maxResults": max_results,
+            "orderBy":"updated",
+            "fetchBodies": with_body
+        }
+        try:
+            response = await self.client.get(f"{self.base_url}/blogs/{blog_id}/posts/search", params=params)
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error searching posts in blog {blog_id}: {e.response.status_code} - {e.response.text}")
+            if e.response.status_code == 404:
+                return None
+
+
+    # ...
