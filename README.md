@@ -73,7 +73,10 @@ Why Query Blogger MCP Server to read a public blog posts on Blogger platform?
 - **Run this MCP Server**
 
     ```bash
-    # run library module as a script
+    # Run MCP Server in STDIO mode
+    python -m query_blogger_mcp_server.server --stdio
+
+    # Run MCP Server in HTTP mode
     python -m query_blogger_mcp_server.server
 
     # Or, the production-ready way if you have `query_blogger_mcp_server` installed:
@@ -137,6 +140,38 @@ Your Core Agent (e.g., Ollama-deployed Qwen2.5 application) would then be config
 - Be provided with the tool definitions that `FastMCP` automatically generates for `get_blog_info_by_url` and `get_latest_posts_by_blog_url`.
 
 The LLM will then learn to call these tools when a user asks about blog content.
+
+
+#### 1.3.1 Integrating locally hosted Query Blogger MCP Server to Claude Desktop
+
+> Claude Desktop as yet doesn't seem to support HTTP Transport integration with MCP Server and so I show integration configuration to local MCP server run in STDIO mode
+
+Your claude desktop config file `claude_desktop_config.json` will have below snippet
+```json
+{
+  "mcpServers": {
+    "query_blogger": {
+      "command": "wsl",
+      "args": [
+        "bash", "-c",
+        "cd /absolute/path/to/your/query_blogger_mcp_server/in/wsl && source .venv/bin/activate && python -m query_blogger_mcp_server.server --stdio"
+      ]
+    }
+  }
+}
+```
+
+After changing this config file, restart your claude desktop to check if the `query_blogger` tool is integrated successfully as shown in pics below:
+
+![tool integration check 1](docs/pics/claude_desktop_integration_w_query_blogger_1.png)
+
+![tool integration check 2](docs/pics/claude_desktop_integration_w_query_blogger_2.png)
+
+If this tool is enabled, you can check the tool in action as shown in screenshot below:
+
+![Demo of Query Blogger Tool In Action](docs/pics/query_blogger_mcs_server_demo_1.png)
+
+[Check out the screenshot in new window](https://claude.ai/share/89515164-2998-479a-86b1-3277b81a3a4d)
 
 ---
 

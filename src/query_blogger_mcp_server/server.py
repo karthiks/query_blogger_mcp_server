@@ -7,6 +7,7 @@ from fastmcp import FastMCP
 import logging
 from urllib.parse import urlparse
 from typing import Dict
+import sys
 
 # Import components from our own package
 from query_blogger_mcp_server.blogger_api_client import BloggerAPIClient
@@ -278,14 +279,21 @@ async def search_posts(blog_url: str, query_terms: str, num_posts: int = 5) -> D
 # The app will also support SSE (Server-Sent Events) for streaming responses.
 app = mcp.http_app(transport="http")
 if __name__ == "__main__":
-    logger.info("Starting QueryBlogger MCP Server via Uvicorn...")
     logger.info(f"Blogger API Key: {'Set' if settings.BLOGGER_API_KEY else 'NOT SET (CRITICAL!)'}")
     logger.info(f"Allowed Domains: {settings.ALLOWED_DOMAINS}")
-    logger.info(f"Server Host: {settings.UVICORN_HOST}, Port: {settings.UVICORN_PORT}")
 
-    uvicorn.run("query_blogger_mcp_server.server:app",
-                host=settings.UVICORN_HOST,
-                port=settings.UVICORN_PORT,
-                reload=True, # Enable auto-reload for development
-                log_level="debug"
-                )
+    # Check if running in stdio mode (when called by Claude Desktop)
+    if len(sys.argv) > 1 and sys.argv[1] == "--stdio":
+        # Stdio mode for Claude Desktop
+        logger.info("Starting QueryBlogger MCP Server in STDIO mode...")
+        mcp.run()
+    else:
+        logger.info("Starting QueryBlogger MCP Server via Uvicorn...")
+        logger.info(f"Server Host: {settings.UVICORN_HOST}, Port: {settings.UVICORN_PORT}")
+        uvicorn.run(
+                    "query_blogger_mcp_server.server:app",
+                    host=settings.UVICORN_HOST,
+                    port=settings.UVICORN_PORT,
+                    # reload=True, # Enable auto-reload for development
+                    log_level="debug"
+                    )
