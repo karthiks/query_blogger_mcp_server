@@ -171,7 +171,9 @@ If this tool is enabled, you can check the tool in action as shown in screenshot
 
 ![Demo of Query Blogger Tool In Action](docs/pics/query_blogger_mcs_server_demo_1.png)
 
-[Check out the screenshot in new window](https://claude.ai/share/89515164-2998-479a-86b1-3277b81a3a4d)
+Links in screenshots of conversation leveraging Query Blogger MCP below:
+- [QnA 1](https://claude.ai/share/386d1236-dd98-4af0-91c3-897e2164f418)
+- [QnA 2](https://claude.ai/share/8707fadd-f072-4be0-9a91-96731c28a539)
 
 ---
 
@@ -237,6 +239,7 @@ Before you get started, please see our [Contribution Guide](./README-DEV.md).
     [X] Dev Onboarding with README-DEV.md
     [X] Externalize configurations
     [X] Containerize with Docker
+    [X] Integration with Claude Desktop
     [ ] Security Fix: Upgrade to Vulnerable free Docker Image version (3.10 images have 2 critical vulnerabilityes) - Python-v3.14??
     [ ] Unit Test Cases
     [ ] Features
