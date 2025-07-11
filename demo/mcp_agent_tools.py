@@ -50,7 +50,8 @@ class MCPAgentTools:
         self.client = httpx.AsyncClient(headers=self.headers, timeout=30.0)
         logger.info(f"MCP Agent Tools initialized for fixed server: {self.base_url}")
 
-    def _parse_response(self, response) -> Dict:
+    @staticmethod
+    def parse_response(response) -> Dict:
         raw_response_text = response.text
         logger.debug(f"Raw response status: {response.status_code}")
         logger.debug(f"Raw response headers: {response.headers}")
@@ -89,7 +90,11 @@ class MCPAgentTools:
             )
             response.raise_for_status()
 
-            methods = self._parse_response(response) \
+            response_data = MCPAgentTools.parse_response(response)
+            if 'error' in response_data:
+                return response_data
+
+            methods = response_data \
                 .get("result", []) \
                 .get("tools",[])
             logger.info(f"methods = {methods}")
@@ -145,26 +150,9 @@ class MCPAgentTools:
             response = await self.client.post(url, json=json_rpc_payload)
             response.raise_for_status()
 
-            raw_response_text = response.text
-            logger.debug(f"Raw response status: {response.status_code}")
-            logger.debug(f"Raw response headers: {response.headers}")
-            logger.debug(f"Raw response text (first 500 chars): {raw_response_text[:500]}")
-
-            parsed_sse_data = {}
-            if raw_response_text.startswith("event: message"):
-                data_line = raw_response_text.split("data:", 1)[1].strip()
-                try:
-                    parsed_sse_data = json.loads(data_line)
-                except json.JSONDecodeError as e:
-                    logger.error(f"JSON decoding error of SSE data payload: {e}. Data line: '{data_line}'")
-                    return {"error": f"JSON decoding error of SSE data payload: {e}. Raw data: '{data_line}'"}
-            else:
-                # If it's not SSE, try to parse directly as JSON
-                try:
-                    parsed_sse_data = response.json()
-                except json.JSONDecodeError as e:
-                    logger.error(f"JSON decoding error of direct response: {e}. Raw response text: '{raw_response_text}'")
-                    return {"error": f"JSON decoding error of direct response: {e}. Raw response: '{raw_response_text}'"}
+            parsed_sse_data = MCPAgentTools.parse_response(response)
+            if 'error' in parsed_sse_data:
+                return parsed_sse_data
 
             # Now, process the parsed_sse_data (which is the JSON from the 'data:' line)
             # This is where the actual JSON-RPC result or error is
@@ -189,9 +177,6 @@ class MCPAgentTools:
                 else:
                     # If not nested text, assume the result itself is the final data
                     final_result = parsed_sse_data["result"]
-            elif "error" in parsed_sse_data:
-                # This handles JSON-RPC errors from the server
-                return {"error": f"MCP server JSON-RPC error: {parsed_sse_data['error'].get('message', 'Unknown error')}"}
             else:
                 return {"error": "Unexpected JSON-RPC response format from MCP server (missing 'result' or 'error' key)."}
 
