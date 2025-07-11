@@ -4,8 +4,6 @@ import logging
 import uuid
 from typing import Dict, Any, List, Optional, Tuple
 
-# --- MCP Server Configuration (Assumed to be running) ---
-MCP_SERVER_BASE_URL = "http://172.18.228.135:8000" # Know your WSL IP or use localhost if running on the same machine
 
 # --- Configure basic logging for the agent client ---
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -15,19 +13,18 @@ class MCPAgentTools:
     """
     A class encapsulating the MCP tools available from the query_blogger_mcp_server.
     """
-    def __init__(self):
+    def __init__(self, base_url: str):
+        self.base_url = base_url
         self.client = httpx.AsyncClient()
-        # Define common headers expected by the MCP server
-        # Generate a session ID once for this client instance
-        # self.session_id = str(uuid.uuid4())
+
         # Define common headers expected by the MCP server and pass them to AsyncClient
         self.headers = {
             "Accept": "application/json, text/event-stream",
             "Content-Type": "application/json",
-            # "mcp-session-id": self.session_id, # Generate a session ID for each client instance
         }
+
         self.client = httpx.AsyncClient(headers=self.headers)
-        logger.info(f"MCP Agent Tools initialized for fixed server: {MCP_SERVER_BASE_URL}")
+        logger.info(f"MCP Agent Tools initialized for fixed server: {self.base_url}")
 
         # These tool definitions mimic what an LLM would "know" about your server.
         # In a real scenario, the LLM would dynamically get this from /mcp endpoint.
@@ -39,7 +36,7 @@ class MCPAgentTools:
         Makes an asynchronous call to the MCP server for a specific tool.
         Handles SSE-formatted responses and nested JSON.
         """
-        url = f"{MCP_SERVER_BASE_URL}/mcp/tool/{tool_name}"
+        url = f"{self.base_url}/mcp/tool/{tool_name}"
         logger.info(f"Agent calling MCP tool: {tool_name} with params: {tool_params}")
 
         # Construct the full JSON-RPC 2.0 payload

@@ -5,12 +5,15 @@ import asyncio
 import logging
 from typing import Dict, Any, List, Optional, Tuple
 
-from mcp_agent_tools import MCPAgentTools, MCP_SERVER_BASE_URL
+from mcp_agent_tools import MCPAgentTools
 
 # --- LLM API Configuration ---
 LLM_API_URL = "http://codonomics.local:11434/api/chat"
 OLLAMA_STATUS_URL = "http://codonomics.local:11434/api/tags"
 MODEL_NAME = "qwen2.5:0.5b" # Choose a lightweight model suitable for your laptop
+
+# --- MCP Server Configuration (Assumed to be running) ---
+MCP_SERVER_BASE_URL = "http://172.18.228.135:8000" # Know your WSL IP or use localhost if running on the same machine
 
 # --- Configure basic logging for the agent client ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -58,7 +61,7 @@ class LLMAgentWithMCP:
     Orchestrates user queries by deciding between MCP tool calls and direct LLM calls.
     """
     def __init__(self):
-        self.mcp_tools = MCPAgentTools()
+        self.mcp_tools = MCPAgentTools(MCP_SERVER_BASE_URL)
         self.known_blogs = {
             "our company blog": "https://blog.codonomics.com",
             "company blog's alias URL": "https://kartzontech.blogspot.com",
