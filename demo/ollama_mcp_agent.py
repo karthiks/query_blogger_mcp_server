@@ -16,7 +16,8 @@ MODEL_NAME = "qwen2.5:0.5b" # Choose a lightweight model suitable for your lapto
 MCP_SERVER_BASE_URL = "http://172.18.228.135:8000" # Know your WSL IP or use localhost if running on the same machine
 
 # --- Configure basic logging for the agent client ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level= logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -67,6 +68,12 @@ class LLMAgentWithMCP:
             "company blog's alias URL": "https://kartzontech.blogspot.com",
         }
         logger.info("LLM Agent with MCP initialized.")
+
+    async def list_available_tools(self) -> List[Dict[str, Any]]:
+        """List available tools from the MCP server."""
+        tools = await self.mcp_tools.get_tools()
+        logger.info(f"Discovered {len(tools)} tools")
+        return [tool.to_dict() for tool in tools]
 
     async def _get_blog_url_from_query(self, query: str) -> Optional[str]:
         """Helper to extract blog URL based on keywords."""
@@ -158,6 +165,7 @@ async def main():
 
     print(f"Using local LLM model: {MODEL_NAME}")
     print(f"Connecting to MCP Server at: {MCP_SERVER_BASE_URL}")
+
     print("\nHow can I help you with your Blogger content? (Type 'exit' to quit)")
     print("Try questions like:")
     print("  - 'Tell me about our company blog.'")
@@ -168,6 +176,10 @@ async def main():
 
 
     async with LLMAgentWithMCP() as agent:
+        print("Loading available MCP tools...")
+        tools = await agent.list_available_tools()
+        tool_names = [tool['name'] for tool in tools]
+        print(f"Available MCP tools: {tool_names}")
         while True:
             try:
                 user_input = input("\nYou: ")
