@@ -49,13 +49,13 @@ def _is_allowed_domain(blog_url: str) -> bool:
 
 @mcp.tool(
     annotations={
-        "title": "Get Blog Information",
+        "title": "Get Blog Information By It's URL",
         "readOnlyHint": True,
         "openWorldHint": True
     },
     description="Retrieves public information about a Blogger blog given its URL. ONLY works for allowed, pre-configured domains."
 )
-async def get_blog_info(blog_url: str) -> Dict:
+async def get_blog_info_by_url(blog_url: str) -> Dict:
     """
     Retrieves public information about a Blogger blog by its URL.
     This tool only queries blogs from a list of pre-approved domains for security and scope.
