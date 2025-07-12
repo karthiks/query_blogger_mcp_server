@@ -97,7 +97,6 @@ class QueryBloggerMCPClient:
             methods = response_data \
                 .get("result", []) \
                 .get("tools",[])
-            logger.info(f"methods = {methods}")
             return [
                 ToolDefinition(
                     name=method["name"],
