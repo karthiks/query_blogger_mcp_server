@@ -125,7 +125,6 @@ class LLMAgentWithMCP:
                 "get_blog_info_by_url",
                 {"blog_url": blog_url}
             )
-            # print(f"Tool output for blog info: {tool_output}")
             if "error" not in tool_output:
                 context = (
                     f"Blog Info: Title: {tool_output.get('blog_title', 'N/A')}, "
@@ -150,19 +149,21 @@ class LLMAgentWithMCP:
         """Exit the async context manager and close resources."""
         await self.close()
 
-# --- Main Execution Loop ---
-async def main():
-    # --- Check if Ollama is running ---
+async def ollama_status_check():
+    """Check if Ollama is running by querying its status endpoint."""
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(OLLAMA_STATUS_URL, timeout=10)
             response.raise_for_status()
-        print("Ollama is running.")
+            return True
     except httpx.RequestError as e:
-        print(f"Error connecting to Ollama at {OLLAMA_STATUS_URL}: {e}")
-        print("Please ensure Ollama is running and the model is available.")
-        sys.exit(1)
+        logger.error(f"Error connecting to Ollama at {OLLAMA_STATUS_URL}: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error checking Ollama status: {e}")
+        return False
 
+def show_console_intro_prompt():
     print(f"Using local LLM model: {MODEL_NAME}")
     print(f"Connecting to MCP Server at: {MCP_SERVER_BASE_URL}")
 
@@ -174,24 +175,38 @@ async def main():
     print("  - 'List static pages on our company blog.'")
     print("  - 'Search for 'Python' posts on the dev blog.'")
 
+async def show_available_tools(agent):
+    print("Loading available MCP tools...")
+    tools = await agent.list_available_tools()
+    tool_names = [tool['name'] for tool in tools]
+    print(f"Available MCP tools: {tool_names}")
+
+async def start_conversation(agent):
+    while True:
+        try:
+            user_input = input("\nYou: ")
+            if user_input.lower() == "exit":
+                break
+
+            response = await agent.process_user_query(user_input)
+            print("AI:", response)
+
+        except Exception as e:
+            logger.error(f"An error occurred during query processing: {e}", exc_info=True)
+            print("AI: An unexpected error occurred. Please try again.")
+
+# --- Main Execution Loop ---
+async def main():
+    if(not ollama_status_check()):
+        print(f"Error: Ollama is not running or not reachable at {OLLAMA_STATUS_URL}.")
+        print("Please ensure Ollama is running and the model is available.")
+        sys.exit(1)
+
+    show_console_intro_prompt()
 
     async with LLMAgentWithMCP() as agent:
-        print("Loading available MCP tools...")
-        tools = await agent.list_available_tools()
-        tool_names = [tool['name'] for tool in tools]
-        print(f"Available MCP tools: {tool_names}")
-        while True:
-            try:
-                user_input = input("\nYou: ")
-                if user_input.lower() == "exit":
-                    break
-
-                response = await agent.process_user_query(user_input)
-                print("AI:", response)
-
-            except Exception as e:
-                logger.error(f"An error occurred during query processing: {e}", exc_info=True)
-                print("AI: An unexpected error occurred. Please try again.")
+        await show_available_tools(agent)
+        await start_conversation(agent)
 
 if __name__ == "__main__":
     try:
@@ -202,4 +217,3 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"Fatal error in main execution: {e}", exc_info=True)
         sys.exit(1)
-
