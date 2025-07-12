@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Any, List, Optional
 import ollama
 
-from query_blogger_mcp_client import QueryBloggerMCPClient
+from mcp_client import MCPClient
 
 # --- LLM API Configuration ---
 OLLAMA_HOST = "http://codonomics.local:11434"
@@ -24,7 +24,7 @@ class LLMAgent:
     Orchestrates user queries by deciding between MCP tool calls and direct LLM calls.
     """
     def __init__(self):
-        self.mcp_tools = QueryBloggerMCPClient(MCP_SERVER_BASE_URL)
+        self.mcp_tools = MCPClient(MCP_SERVER_BASE_URL)
         self.known_blogs = {
             "our company blog": "https://blog.codonomics.com",
             "our blog": "https://blog.codonomics.com",

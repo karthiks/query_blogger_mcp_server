@@ -29,7 +29,7 @@ class ToolDefinition(BaseModel):
         }
 
 
-class QueryBloggerMCPClient:
+class MCPClient:
     """
     A class encapsulating the MCP tools available from the query_blogger_mcp_server.
     Dynamically fetches and manages MCP tools from the server.
@@ -90,7 +90,7 @@ class QueryBloggerMCPClient:
             )
             response.raise_for_status()
 
-            response_data = QueryBloggerMCPClient.parse_response(response)
+            response_data = MCPClient.parse_response(response)
             if 'error' in response_data:
                 return response_data
 
@@ -149,7 +149,7 @@ class QueryBloggerMCPClient:
             response = await self.client.post(url, json=json_rpc_payload)
             response.raise_for_status()
 
-            parsed_sse_data = QueryBloggerMCPClient.parse_response(response)
+            parsed_sse_data = MCPClient.parse_response(response)
             if 'error' in parsed_sse_data:
                 return parsed_sse_data
 
