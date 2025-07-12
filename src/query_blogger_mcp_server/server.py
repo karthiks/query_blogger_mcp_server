@@ -103,7 +103,7 @@ async def get_blog_info_by_url(blog_url: str) -> Dict:
     },
     description="Fetches the most recent public blog posts for a specified blog URL. ONLY works for allowed, pre-configured domains."
 )
-async def get_recent_posts(blog_url: str, num_posts: int = 3) -> Dict:
+async def get_recent_posts(blog_url: str, num_posts: int = 3, include_content: bool = True) -> Dict:
     """
     Fetches the most recent public blog posts for a given blog URL.
     This tool only queries blogs from a list of pre-approved domains.
@@ -127,7 +127,7 @@ async def get_recent_posts(blog_url: str, num_posts: int = 3) -> Dict:
         return {"error": f"Could not find blog for {blog_url}. It might not exist or there was an API issue.", "requested_url": blog_url}
 
     blog_id = blog_data["id"]
-    posts_data = await blogger_client.get_recent_posts(blog_id, max_results=num_posts)
+    posts_data = await blogger_client.get_recent_posts(blog_id, max_results=num_posts, with_body=include_content)
 
     if posts_data and posts_data.get("items"):
         # Check if posts_data contains an 'error' key from the client, indicating an API issue
