@@ -3,6 +3,8 @@ import asyncio
 import logging
 from typing import Dict, Any, List, Optional
 import ollama
+import re
+
 
 from mcp_client import MCPClient
 
@@ -32,6 +34,15 @@ class LLMAgent:
         }
         self.ollama_client = ollama.AsyncClient(host=OLLAMA_HOST, timeout=10)
         logger.info("LLM Agent with MCP initialized.")
+
+    @staticmethod
+    def find_string(input_str):
+        pattern = r"search for posts on topic (.*?) in "
+        match = re.search(pattern, input_str)
+        if match:
+            return match.group(1)
+        else:
+            return None
 
     async def call_ollama(self, user_input: str, context: Optional[str] = None) -> str:
         """Call the local Ollama API for chat completion with optional context."""
@@ -67,6 +78,8 @@ class LLMAgent:
             if key in query.lower():
                 logger.info(f"Returning known blog URL for '{key}': {url}")
                 return url
+        if("{self.known_blogs.get('our blog')}" in query):
+            return self.known_blogs.get("our blog", None)
         return None
 
     async def process_user_query(self, user_query: str) -> str:
@@ -75,19 +88,40 @@ class LLMAgent:
         then falling back to the LLM if no tool is applicable or
         to synthesize a response from tool output.
         """
-        user_query = user_query.lower().replace("recent", "latest").replace("blogs","posts")  # Normalize query for easier matching
         blog_url = self._get_blog_url_from_query(user_query)
+        user_query = user_query.lower() \
+                    .replace("recent", "latest") \
+                    .replace("blogs","posts")  \
+                    .replace("our blog", self.known_blogs.get("our blog", blog_url))    # Normalize query for easier matching
 
-        # --- Tool 1: Get latest posts ---
-        if ("latest posts from" in user_query) and blog_url:
-            num_posts_str = ''.join(filter(str.isdigit, user_query.split("latest posts from")[0]))
-            num_posts = int(num_posts_str) if num_posts_str.isdigit() else 3
+        if not blog_url:
+            return "Unknown blog source. Please specify which blog you are referring to."
 
-            include_content = "with content" in user_query or "for answering questions" in user_query
+        # --- Tool 1: List recent posts ---
+        # list recent posts from our blog
+        if ("list recent posts" in user_query) and (blog_url in user_query):
+            tool_output = await self.mcp_tools.call_mcp_tool(
+                "list_recent_posts",
+                {"blog_url": blog_url, "max_results": 5, "with_body": False}  # Default to 5 posts without content
+            )
+            if "error" not in tool_output and tool_output.get("recent_posts"):
+                posts_summary = "\n".join([
+                    f"- {p['title']} ({p['url']}) published {p['published']}"
+                    for p in tool_output['recent_posts']
+                ])
+                context = (
+                    f"Here are the recent posts from {tool_output.get('blog_title', 'N/A')}:\n"
+                    f"{posts_summary}\n\n"
+                    f"Please summarize this information for the user's request: '{user_query}'"
+                )
+                return await self.call_ollama(user_query, context=context)
 
+        # --- Tool 2: Get latest posts ---
+        # get latest posts from our blog
+        elif ("latest posts from" in user_query):
             tool_output = await self.mcp_tools.call_mcp_tool(
                 "get_recent_posts",
-                {"blog_url": blog_url, "num_posts": num_posts, "include_content": include_content}
+                {"blog_url": blog_url, "num_posts": 3, "include_content": True}
             )
 
             if "error" not in tool_output and tool_output.get("recent_posts"):
@@ -104,8 +138,8 @@ class LLMAgent:
             else:
                 return f"Failed to get latest posts: {tool_output.get('error', 'No posts found.')}"
 
-        # --- Tool 2: Get blog info ---
-        elif ("about our blog" in user_query) or (f"about {blog_url}" in user_query and blog_url):
+        # --- Tool 3: Get blog info ---
+        elif f"about {blog_url}" in user_query:
             if(not blog_url):
                 blog_url = self.known_blogs.get("our company blog", None)
             tool_output = await self.mcp_tools.call_mcp_tool(
@@ -123,6 +157,31 @@ class LLMAgent:
                 return await self.call_ollama(user_query, context=context) # Synthesize with Ollama
             else:
                 return f"Failed to get blog info: {tool_output['error']}"
+
+        # --- Tool 3: Search posts ---
+        # search for posts on topic AI in our blog
+        elif ("search for posts on topic" in user_query) and (blog_url in user_query):
+            search_term = self.find_string(user_query)
+            if not search_term:
+                return "Please specify a search term after 'search for posts on topic'."
+            tool_output = await self.mcp_tools.call_mcp_tool(
+                "search_posts",
+                {"blog_url": blog_url, "query_terms": search_term}
+            )
+            if "error" not in tool_output:
+                if tool_output.get('matching_posts'):
+                    results_summary = "\n".join([f"- {p['title']} ({p['url']})" for p in tool_output['matching_posts']])
+                    context = (
+                        f"Search Results for '{search_term}' on {tool_output.get('blog_title', 'N/A')}:\n"
+                        f"{results_summary}\n\n"
+                        f"Please summarize this information for the user's request: '{user_query}'"
+                    )
+                    return await self.call_ollama(user_query, context=context)
+                else:
+                    return "No search results found."
+            else:
+                return f"Failed to search posts: {tool_output['error']}"
+
 
     async def close(self):
         """Close the httpx client sessions."""
@@ -157,12 +216,12 @@ def show_console_intro_prompt():
 
     print("\nHow can I help you with your Blogger content? (Type 'exit' to quit)")
     print("Try questions like:")
-    print("  - 'Tell me about our company blog.'")
+    print("  - 'Tell me about our blog.'")
     print("  - 'Get latest posts from our blog.'")
     print("  - 'Get latest posts from our blog with content.'")
     print("  - 'Answer question about our blog: What is X?' (requires content loaded first)")
-    print("  - 'List static pages on our company blog.'")
-    print("  - 'Search for 'Python' posts on the dev blog.'")
+    print("  - 'List static pages on our blog.'")
+    print("  - 'Search for 'Python' posts on our blog.'")
 
 async def show_available_tools(agent):
     print("Loading available MCP tools...")
