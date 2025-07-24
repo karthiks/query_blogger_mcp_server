@@ -4,7 +4,7 @@ import httpx
 import logging
 import json
 from typing import Dict, List, Optional
-
+from query_blogger_mcp_server.html_util import html_to_markdown
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,6 @@ class BloggerAPIClient:
         self.api_key = api_key
         self.base_url = "https://www.googleapis.com/blogger/v3"
         self.client = httpx.AsyncClient() # Asynchronous HTTP client
-
 
     async def get_blog_by_url(self, blog_url: str) -> Optional[Dict]:
         """
@@ -82,18 +81,27 @@ class BloggerAPIClient:
         params = {
             "key": self.api_key,
             "q": query_terms,
-            "maxResults": max_results,
-            "orderBy":"updated",
+            "orderBy":"published",
             "fetchBodies": with_body
         }
         try:
             response = await self.client.get(f"{self.base_url}/blogs/{blog_id}/posts/search", params=params)
             response.raise_for_status()
-            return response.json()
+            result = BloggerAPIClient.process_blog_posts(response.json(), max_results)
+            return result
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error searching posts in blog {blog_id}: {e.response.status_code} - {e.response.text}")
             if e.response.status_code == 404:
                 return None
 
+    @staticmethod
+    def process_blog_posts(dict_data,max_results):
+        """Process JSON data to convert all HTML fields to Markdown"""
 
-    # ...
+        if 'items' in dict_data:
+            dict_data['items'] = dict_data['items'][:max_results]
+            for item in dict_data['items']:
+                if 'content' in item:
+                    item['content'] = html_to_markdown(item['content'])
+
+        return dict_data

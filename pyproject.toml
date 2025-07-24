@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "query_blogger_mcp_server"
-version = "0.1.0"
+version = "0.1.1"
 description = "Model Context Protocol (MCP) server for read-only, domain-specific Blogger API access."
 authors = [
     { name = "Karthik Sirasanagandla", email = "sirkarthik@gmail.com" }
@@ -26,6 +26,7 @@ dependencies = [
     # If you were using the knowledge base, keep these:
     # "sentence-transformers>=2.7.0,<2.8.0",
     # "numpy>=1.26.4,<1.27.0",
+    "html2text>=2025.4.15", # For HTML to Markdown conversion
 ]
 
 
@@ -38,6 +39,11 @@ dev = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "pyright>=1.1.394",
+    "ollama>=0.5.1", # For demo code
+    "beautifulsoup4>=4.13.4", # For demo code
+    "langchain>=0.3.26", # For demo code
+    "transformers>=4.53.1", # For HuggingFace pipelines
+    # "diffusers>=0.34.0", # For generating images
 ]
 
 [tool.pip-tools]

@@ -258,6 +258,8 @@ async def search_posts(blog_url: str, query_terms: str, num_posts: int = 5) -> D
                 "url": post.get("url"),
                 "published": post.get("published"),
                 "content": post.get("content", ""),
+                "author": post.get("author", {}).get("displayName",""),
+                "labels": post.get("labels", ""),
             }
             for post in posts_data["items"]
         ]
