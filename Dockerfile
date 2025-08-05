@@ -1,6 +1,7 @@
 # Use a slim Python base image for a smaller footprint.
 # Using 3.10-slim-buster to match your pyenv version, adjust as needed (e.g., 3.11-slim-bookworm for newer Python).
 # FROM python:3.14.0b3-alpine3.21
+# FROM python:3.13.5-bookworm
 FROM python:3.10-slim-buster
 
 # Set the working directory inside the container.
@@ -12,7 +13,8 @@ ENV PYTHONUNBUFFERED=1
 
 # Copy pyproject.toml first. Docker will use this to install dependencies.
 # If this file doesn't change, Docker won't re-run the pip install command.
-COPY pyproject.toml ./
+# COPY pyproject.toml /app/
+COPY . .
 
 # Install production dependencies directly from pyproject.toml.
 # The 'pip install .' command reads dependencies from the [project] table in pyproject.toml.
@@ -31,18 +33,18 @@ RUN pip install --no-cache-dir --upgrade pip && \
 #         ├── blogger_api_client.py
 #         ├── config.py
 #         └── server.py
-COPY src/ /app/src/
+# COPY src/ /app/src/
 
 # Expose the port Uvicorn will listen on. This should match UVICORN_PORT in config.py.
 EXPOSE 8000
 
 # Define the command to run your application using Uvicorn.
 # 'query_blogger_mcp_server.server' refers to the server.py module inside your package.
-# 'mcp.app' is the FastAPI application object exposed by your FastMCP instance.
+# 'app' is the FastAPI application object exposed by your FastMCP instance.
 # --host 0.0.0.0: Makes the server accessible from outside the container.
 # --port 8000: Specifies the port Uvicorn listens on (matches EXPOSE and config.py default).
 # --workers 1: For a simple setup, 1 worker is fine. For production, consider increasing this
 #              based on CPU cores (e.g., --workers $(nproc) or a fixed number).
 #              Using a process manager like Gunicorn with Uvicorn workers is common for
 #              more robust production deployments, but this is a good starting point.
-CMD ["uvicorn", "query_blogger_mcp_server.server:mcp.app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["uvicorn", "query_blogger_mcp_server.server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
