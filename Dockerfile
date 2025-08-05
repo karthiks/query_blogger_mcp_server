@@ -1,8 +1,6 @@
 # Use a slim Python base image for a smaller footprint.
 # Using 3.10-slim-buster to match your pyenv version, adjust as needed (e.g., 3.11-slim-bookworm for newer Python).
-# FROM python:3.14.0b3-alpine3.21
-# FROM python:3.13.5-bookworm
-FROM python:3.10-slim-buster
+FROM python:3.13.5-slim
 
 # Set the working directory inside the container.
 WORKDIR /app

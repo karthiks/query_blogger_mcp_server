@@ -240,13 +240,10 @@ Before you get started, please see our [Contribution Guide](./README-DEV.md).
     [X] Externalize configurations
     [X] Containerize with Docker
     [X] Integration with Claude Desktop
-    [ ] Security Fix: Upgrade to Vulnerable free Docker Image version (3.10 images have 2 critical vulnerabilityes) - Python-v3.14??
+    [X] Security Fix: Upgrade to Vulnerable free Docker Image version (3.10 images have 2 critical vulnerabilityes) - Python-v3.14??
     [ ] Unit Test Cases
     [ ] Features
         - [X] Get Blog Information by URL (get_blog_info_by_url)
         - [X] Get Latest Posts by Blog URL (get_latest_posts_by_blog_url)
-        - [] Get Comments for a Specific Blog Post (get_post_comments)
-            - Prompt: Are there any comments on the post, "The Truth About AI Coding Agents"?
-            - Prompts: What are the comments on the blog post titled "The Truth About AI Coding Agents"?
-            - Prompt: Summarize the feedback from the comments section of the article "The Truth About AI Coding Agents"
-
+            - Return response in Markdown format instead of raw HTML.
+        - [X] Search posts for query terms
