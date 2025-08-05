@@ -13,7 +13,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Copy pyproject.toml first. Docker will use this to install dependencies.
 # If this file doesn't change, Docker won't re-run the pip install command.
-# COPY pyproject.toml /app/
+# COPY pyproject.toml README.md ./
 COPY . .
 
 # Install production dependencies directly from pyproject.toml.
@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 #         ├── blogger_api_client.py
 #         ├── config.py
 #         └── server.py
-# COPY src/ /app/src/
+COPY src/ /app/src/
 
 # Expose the port Uvicorn will listen on. This should match UVICORN_PORT in config.py.
 EXPOSE 8000
