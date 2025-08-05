@@ -2,7 +2,7 @@ import sys
 import asyncio
 import logging
 from typing import Dict, Any, List, Optional
-import ollama
+from ollama import AsyncClient
 import re
 
 
@@ -32,7 +32,7 @@ class LLMAgent:
             "our blog": "https://blog.codonomics.com",
             "https://kartzontech.blogspot.com" : "https://blog.codonomics.com",
         }
-        self.ollama_client = ollama.AsyncClient(host=OLLAMA_HOST, timeout=10)
+        self.ollama_client = AsyncClient(host=OLLAMA_HOST, timeout=10)
         logger.info("LLM Agent with MCP initialized.")
 
     @staticmethod
@@ -58,7 +58,7 @@ class LLMAgent:
             response = await self.ollama_client.chat(
                 model=MODEL_NAME,
                 messages=messages,
-                options={"num_ctx": 4096},  # Adjust context window if needed
+                options={"temperature": 0.5,"num_ctx": 4096},  # Adjust context window if needed
                 stream=False,  # Non-streaming for simplicity
             )
             return response["message"]["content"]
