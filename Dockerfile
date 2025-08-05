@@ -21,18 +21,6 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir .
 
-# Copy the entire source code (the 'src' directory) into the container.
-# This assumes your project structure is:
-# /project_root
-# ├── pyproject.toml
-# └── src/
-#     └── query_blogger_mcp_server/
-#         ├── __init__.py
-#         ├── blogger_api_client.py
-#         ├── config.py
-#         └── server.py
-COPY src/ /app/src/
-
 # Expose the port Uvicorn will listen on. This should match UVICORN_PORT in config.py.
 EXPOSE 8000
 
