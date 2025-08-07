@@ -4,6 +4,8 @@
 
 import uvicorn
 from fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 import logging
 from urllib.parse import urlparse
 from typing import Dict
@@ -26,7 +28,6 @@ mcp = FastMCP(
     name=settings.MCP_SERVER_NAME,
     version=settings.MCP_SERVER_VERSION,
     instructions=settings.MCP_SERVER_DESCRIPTION,
-    stateless_http=True,
 )
 
 # Helper function to check if a URL belongs to an allowed domain
@@ -279,23 +280,62 @@ async def search_posts(blog_url: str, query_terms: str, num_posts: int = 5) -> D
 # The MCP server will be accessible at the /mcp endpoint.
 # The tools will be available at /mcp/tool/{tool_name} endpoints.
 # The app will also support SSE (Server-Sent Events) for streaming responses.
+# @mcp.custom_route("/health", methods=["GET"])
+# async def health_check(request: Request):
+#     # Ref.: https://gofastmcp.com/integrations/starlette#health-check-endpoints
+#     return JSONResponse({"status": "healthy"})
+# Basic dynamic resource returning a string
+# Ref.: https://gofastmcp.com/servers/resources
+@mcp.resource("resource://health")
+def health_check() -> str:
+    """Provides a simple health check message."""
+    return "ok"
+
+
+# Resource returning JSON data (dict is auto-serialized)
+# Ref.: https://gofastmcp.com/servers/resources
+# @mcp.resource("data://config")
+@mcp.custom_route("/config", methods=["GET"])
+def get_server_config(req: Request) -> Dict:
+    """Provides application configuration as JSON."""
+    return JSONResponse({
+        "server_name": f"{settings.MCP_SERVER_NAME}",
+        "server_description": f"{settings.MCP_SERVER_DESCRIPTION}",
+        "server_version": f"{settings.MCP_SERVER_VERSION}",
+        "api_version": "v3",
+        "allowed_domains": f"{settings.ALLOWED_DOMAINS}"
+    })
+
+def run_mcp_server_in_stdio_mode():
+    """Run the MCP server in STDIO mode for Claude Desktop integration."""
+    logger.info("Starting QueryBlogger MCP Server in STDIO mode...")
+    mcp.run(transport="stdio") # Default, so transport argument is optional
+
 app = mcp.http_app(transport="http")
+def run_mcp_server_in_http_mode():
+    """Run the MCP server in HTTP mode."""
+    logger.info("Starting QueryBlogger MCP Server via Uvicorn...")
+    logger.info(f"Server Host: {settings.UVICORN_HOST}, Port: {settings.UVICORN_PORT}")
+    # uvicorn.run(
+    #             "query_blogger_mcp_server.server:app",
+    #             host=settings.UVICORN_HOST,
+    #             port=settings.UVICORN_PORT,
+    #             # reload=True, # Enable auto-reload for development
+    #             log_level="debug"
+    #             )
+    mcp.run(transport="http",
+            host=settings.UVICORN_HOST,
+            port=settings.UVICORN_PORT,
+            path="/mcp"
+    )
+
 if __name__ == "__main__":
     logger.info(f"Blogger API Key: {'Set' if settings.BLOGGER_API_KEY else 'NOT SET (CRITICAL!)'}")
     logger.info(f"Allowed Domains: {settings.ALLOWED_DOMAINS}")
 
     # Check if running in stdio mode (when called by Claude Desktop)
     if len(sys.argv) > 1 and sys.argv[1] == "--stdio":
-        # Stdio mode for Claude Desktop
-        logger.info("Starting QueryBlogger MCP Server in STDIO mode...")
-        mcp.run()
+        # mcp.run()
+        run_mcp_server_in_stdio_mode()
     else:
-        logger.info("Starting QueryBlogger MCP Server via Uvicorn...")
-        logger.info(f"Server Host: {settings.UVICORN_HOST}, Port: {settings.UVICORN_PORT}")
-        uvicorn.run(
-                    "query_blogger_mcp_server.server:app",
-                    host=settings.UVICORN_HOST,
-                    port=settings.UVICORN_PORT,
-                    # reload=True, # Enable auto-reload for development
-                    log_level="debug"
-                    )
+        run_mcp_server_in_http_mode()
