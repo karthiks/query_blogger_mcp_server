@@ -8,6 +8,9 @@ Why Query Blogger MCP Server to read a public blog posts on Blogger platform?
 - Simple configuration and you are ready to go.
 - This server is designed to be secure, efficient, and easy to use with LLMs.
 
+Reference Projects:
+- [query_blogger_mcp_server_demo](https://github.com/karthiks/query_blogger_mcp_server_demo) 
+- [query_blogger_mcp_demo](https://github.com/karthiks/query_blogger_mcp_demo)
 ---
 
 ## 1. How to use this library?
